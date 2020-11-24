@@ -1,4 +1,3 @@
-// Include required header files from OpenCV directory 
 #include "opencv2/objdetect.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/imgproc.hpp"
@@ -19,13 +18,13 @@ int main(int argc, const char** argv)
 {
 	VideoCapture capture;
 	Mat frame, image;
-
+	
 	CascadeClassifier cascade;
 	cascade.load("haarcascades/haarcascade_frontalface_default.xml");
 
-	int inc_num[2] = { 30, 20 };
-	int block_size[2] = { 1280 / inc_num[0], 720 / inc_num[1] };
-	int prev_loc[2] = { 640, 360 };
+	int inc_num[2] = { 30, 20 };						// no of increments in each direction
+	int block_size[2] = { 1280 / inc_num[0], 720 / inc_num[1] };		// size of a block on the screen
+	int prev_loc[2] = { 640, 360 };						// used for tracking location of head
 
 	// Start Video
 	capture.open(0);
@@ -49,11 +48,12 @@ int main(int argc, const char** argv)
 			Mat frame1 = frame.clone();
 			Point center = detectCenter(frame1, cascade, prev_loc);
 
+			// identify the block to which the face belongs to and the respective frame number
 			int block[2] = { int(prev_loc[0] / block_size[0]), int(prev_loc[1] / block_size[1]) };
 			int frame_num = inc_num[1] - block[1] - 1 + inc_num[1] * (inc_num[0] - block[0]);
 
 			string fpath = "warped/" + to_string(frame_num) + ".jpg";
-			//string fpath = "non_warped/" + to_string(frame_num) + ".png";
+			//string fpath = "non_warped/" + to_string(frame_num) + ".png"; // for output before warp
 			Mat img = cv::imread(fpath);
 
 			//cv::resize(img, img, Size(720, 720));
@@ -84,7 +84,6 @@ Point detectCenter(Mat& img, CascadeClassifier& cascade, int (&prev_c)[2])
 	Point center;
 
 	cvtColor(img, gray, COLOR_BGR2GRAY); // Convert to Gray Scale
-	// equalizeHist(gray, gray);
 
 	// Detect faces of different sizes using cascade classifier 
 	cascade.detectMultiScale(gray, faces, 1.1, 2);
